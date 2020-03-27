@@ -32,19 +32,6 @@ class QuestionRepository extends ServiceEntityRepository
         return $questionObj;
     }
 
-    public function pagination(array $criteria, array $orderBy = null, $limit = null, $offset = null) {
-        $qb = $this->createQueryBuilder('a');
-        $query=$qb->getQuery();
-// SHOW SQL:
-        echo $query->getSQL();
-// Show Parameters:
-        echo $query->getParameters();
-    }
-
-    public function findByTest(array $criteria, array $orderBy = null, $limit = null, $offset = null) {
-
-    }
-
     // /**
     //  * @return Question[] Returns an array of Question objects
     //  */

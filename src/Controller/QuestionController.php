@@ -84,10 +84,18 @@ class QuestionController extends AbstractController
      * )
      * @SWG\Parameter(
      *         name="question",
-     *         in="body",
-     *         description="Enter the question",
-     *         @Model(type=Question::class)
+     *         in="formData",
+     *         type="string",
+     *         description="Enter the question"
+     *         required=true
      *
+     * )
+     *
+     * @SWG\Parameter(
+     *         name="rank",
+     *         in="formData",
+     *         type="string",
+     *         description="Enter the rank of the question"
      * )
      */
     public function create(Request $request) : JsonResponse

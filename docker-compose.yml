@@ -36,7 +36,7 @@ services:
         - .:/application
         - ./docker/php-fpm/php-ini-overrides.ini:/etc/php/7.3/fpm/conf.d/99-overrides.ini
       environment:
-        XDEBUG_CONFIG: "remote_host=${localIp}"
+        XDEBUG_CONFIG: "remote_host=127.0.0.1"
 
     # DB connection & admin
     adminer:

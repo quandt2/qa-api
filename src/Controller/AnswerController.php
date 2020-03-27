@@ -49,7 +49,6 @@ class AnswerController extends AbstractController
             $this->logger->info(\GuzzleHttp\json_encode($data));
             $question_id = $data["question_id"];
             $question = $this->questionRepository->find($question_id);
-
             if ($question == null) {
                 throw New NotFoundHttpException("Not found question");
             }
