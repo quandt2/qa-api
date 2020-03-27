@@ -60,7 +60,6 @@ class AnswerController extends AbstractController
      *         description="Enter the question info",
      *         required=true,
      *          @SWG\Schema(
-     *             @SWG\Property(property="id", type="integer", description="UUID"),
      *             @SWG\Property(property="answer_id", type="integer"),
      *             @SWG\Property(property="answer", type="string"),
      *             @SWG\Property(property="tags", type="string"),
