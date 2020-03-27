@@ -1,0 +1,46 @@
+version: "3.1"
+
+volumes:
+    db-data:
+
+services:
+    mysql:
+      image: mysql:5.7
+      container_name: qa-mysql
+      working_dir: /application
+      volumes:
+        - db-data:/application
+      environment:
+        - MYSQL_ROOT_PASSWORD=root
+        - MYSQL_DATABASE=qa_db
+        - MYSQL_USER=qa_user
+        - MYSQL_PASSWORD=qa_pw
+      ports:
+        - "8306:3306"
+
+    webserver:
+      image: nginx:alpine
+      container_name: qa-webserver
+      working_dir: /application
+      volumes:
+        - .:/application
+        - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      ports:
+        - "8000:80"
+
+    php-fpm:
+      build: docker/php-fpm
+      container_name: qa-php-fpm
+      working_dir: /application
+      volumes:
+        - .:/application
+        - ./docker/php-fpm/php-ini-overrides.ini:/etc/php/7.3/fpm/conf.d/99-overrides.ini
+      environment:
+        XDEBUG_CONFIG: "remote_host=${localIp}"
+
+    # DB connection & admin
+    adminer:
+      image: adminer
+      container_name: qa-adminer
+      ports:
+        - "8080:8080"
