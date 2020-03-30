@@ -30,7 +30,7 @@ class QuestionController extends AbstractController
 
     /**
      * get the list of question and its answer
-     * @Route("/question", name="question", methods={"POST"})
+     * @Route("/question/get", name="question", methods={"GET"})
      *
      * @SWG\Response(
      *     response=200,
@@ -43,45 +43,56 @@ class QuestionController extends AbstractController
      *     )
      * )
      * @SWG\Parameter(
-     *          name="body",
-     *          in="body",
-     *          required=true,
-     *          @SWG\Schema(
+     *          name="sortBy",
+     *          in="query",
+     *          required=false,
+     *          type="string",
+     *          description="sort by id or rank",
+     *          enum={"id", "rank"}
      *
+     *      ),
      *
-     *              @SWG\Property(
-     *                  property="search",
+     * @SWG\Parameter(
+     *          name="orderBy",
+     *          in="query",
+     *          required=false,
+     *          type="string",
+     *          description="orderby rank",
+     *          enum={"ASC", "DESC"}
      *
-     *                  @SWG\Property(property="question", type="string", description = "search by question"),
-     *                  @SWG\Property(property="rank", type="integer", description = "search by rank"),
-     *              ),
-     *              @SWG\Property(
-     *                  property="orderBy",
-     *                  @SWG\Property(property="id", type="integer", description="can be null/ASC/DESC"),
-     *                  @SWG\Property(property="rank", type="string", description="can be null/ASC/DESC"),
-     *              ),
-     *              @SWG\Property(property="itemPerPage",  type="integer", description="used for pagination" ),
-     *              @SWG\Property(property="pageNumber",  type="integer",  description="used for pagination"),
+     *      ),
      *
-     *          ),
+     * @SWG\Parameter(
+     *          name="itemPerPage",
+     *          in="query",
+     *          required=false,
+     *          type="string",
+     *          description="number of item inn page",
+     *          default="10"
+     *      ),
+     *
+     * @SWG\Parameter(
+     *          name="pageNumber",
+     *          in="query",
+     *          required=false,
+     *          type="string",
+     *          description="Page number",
+     *          default="1"
      *      ),
      */
-    public function index(Request $request)
+    public function getQuestion(Request $request)
     {
         try {
-            $data = json_decode($request->getContent(), true);
+            $itemPerPage = !empty($request->query->get("itemPerPage")) ? $request->query->get("itemPerPage") : 10;
+            $pageNumber = !empty($request->query->get("pageNumber")) ? $request->query->get("pageNumber") : 1;
+            $sortBy = !empty($request->query->get("sortBy")) ? $request->query->get("sortBy") : "id" ;
+            $orderBy = !empty($request->query->get("orderBy")) ? $request->query->get("orderBy") : "ASC";
 
-            $this->logger->info("input data");
-            $this->logger->info(json_encode($data));
-            $search = $data["search"];
-            $orderBy = !empty($data["orderBy"]) ? $data["orderBy"] : ["id" => "ASC"];
-            //$pagination = $data["pagination"];
-            $itemPerPage = isset($data["itemPerPage"]) ? $data["itemPerPage"] : 10;
-            $pageNumber = isset($data["pageNumber"]) ? $data["pageNumber"] : 1;
+
             //$total = $this->questionRepository->count($search);
             $offset = ($pageNumber - 1) * $itemPerPage;
 
-            $allQuestion = $this->questionRepository->findBy($search, $orderBy, $itemPerPage, $offset);
+            $allQuestion = $this->questionRepository->findBy([], [$sortBy => $orderBy], $itemPerPage, $offset);
 
             $result = [];
             foreach ($allQuestion as $question) {
@@ -93,24 +104,25 @@ class QuestionController extends AbstractController
                 $result[] = [
                     "id" => $question->getId(),
                     "question" => $question->getQuestion(),
-                    "answer" => $answer
+                    "answer" => $answer,
+                    "rank" => $question->getRank()
                 ];
             }
             return new JsonResponse([
                 "success" => true,
-                "detail" => [
-                    "question" => json_encode($result, true)
-                ]], Response::HTTP_OK);
+                "data" => $result
+
+                ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
-            return new JsonResponse(["error" => $e->getMessage()], 500);
+            return new JsonResponse(["error" => $e->getMessage()], HTTP_BAD_REQUEST);
         }
     }
 
     /**
      * Create the question
      *
-     * @Route("/createQuestion", name="createQuestion", methods={"POST"})
+     * @Route("/question/create", name="createQuestion", methods={"POST"})
      *
      * @SWG\Response(
      *     response=200,
@@ -138,10 +150,8 @@ class QuestionController extends AbstractController
     {
         try {
             $data = json_decode($request->getContent(), true);
-            $this->logger->info(json_encode($data));
-            $question = $data["question"];
-            $this->logger->info($question);
-            $rank = $data["rank"];
+            $question = isset($data["question"]) ? $data["question"] : "";
+            $rank = isset($data["rank"]) ? $data["rank"] : "";
 
             if (empty($question) || empty($rank)) {
                 throw new NotFoundHttpException("Expecting not empty parameters");
@@ -157,7 +167,7 @@ class QuestionController extends AbstractController
                 ]], Response::HTTP_CREATED);
 
         } catch (\Exception $e) {
-            return new JsonResponse(["error" => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return new JsonResponse(["error" => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
     }
 }

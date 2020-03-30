@@ -19,10 +19,23 @@ composer update<br/>
 php bin/console make:migration<br/>
 php bin/console doctrine:migrations:migrate<br/>
 
+#Load the fixture to run php unit
+php bin/console doctrine:fixtures:load
+
+
 #run the app for nelmio app
 http://localhost:8000/api/doc<br/>
 
 #use postman or any REST Client to test the qa API
+
+#run phpunit test inside docker php-fpm
+    #get ip of the nginx server
+   docker inspect qa-webserver | grep "IPAddress"
+     
+     #change the APP_URL in .env file to the IP address just found,
+     if you don't do this, you get error "refused to connect of Guzze Client"
+   php bin/phpunit 
+
 
 
 

@@ -95,7 +95,9 @@ class Answer
         return [
             "id" => $this->id,
             "answer_id" => $this->answer_id,
-            "answer" => $this->answer
+            "answer" => $this->answer,
+            "tags" => $this->tags,
+            "question_id" => $this->getQuestionId()->getId()
         ];
     }
 }
